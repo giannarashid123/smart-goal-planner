@@ -2,62 +2,45 @@ import React, { useState } from "react";
 
 function GoalItem({ goal, onDelete, onUpdate }) {
   const { id, name, targetAmount, savedAmount, deadline } = goal;
-  const [depositAmount, setDepositAmount] = useState("");
-
+  const [deposit, setDeposit] = useState("");
   const progress = Math.min((savedAmount / targetAmount) * 100, 100);
   const remaining = targetAmount - savedAmount;
 
-  const today = new Date();
-  const deadlineDate = new Date(deadline);
-  const daysLeft = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-
+  const daysLeft = Math.ceil((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24));
   const isComplete = savedAmount >= targetAmount;
-  const isOverdue = daysLeft < 0 && !isComplete;
-  const isWarning = daysLeft <= 30 && daysLeft >= 0 && !isComplete;
+  const barColor = isComplete ? "green" : daysLeft <= 30 && daysLeft >= 0 ? "orange" : "blue";
 
   function handleDeposit() {
-    const deposit = Number(depositAmount);
-    if (deposit <= 0) return alert("Enter a valid amount");
-
-    const updatedSaved = savedAmount + deposit;
-    onUpdate(id, { savedAmount: updatedSaved });
-    setDepositAmount("");
+    const amt = Number(deposit);
+    if (amt > 0) {
+      onUpdate(id, { savedAmount: savedAmount + amt });
+      setDeposit("");
+    } else {
+      alert("Enter a valid amount");
+    }
   }
 
-  // Dynamic progress bar color
-  const barColor = isComplete ? "green" : isWarning ? "orange" : "blue";
-
   return (
-    <div style={{ border: "1px solid #ccc", padding: "10px", margin: "10px" }}>
+    <div style={{ border: "1px solid #ccc", padding: 10, margin: 10 }}>
       <h4>{name}</h4>
-      <p>Saved: KES {savedAmount} / {targetAmount}</p>
-      <p>Remaining: KES {remaining}</p>
-      <p>Deadline: {deadline} ({daysLeft} days left)</p>
-
-      <div style={{ background: "#eee", height: "10px", marginBottom: "10px" }}>
-        <div
-          style={{
-            width: `${progress}%`,
-            background: barColor,
-            height: "100%",
-            transition: "width 0.5s",
-          }}
-        />
+      <p>SAVED: {savedAmount} / {targetAmount}</p>
+      <p>Remaining: {remaining}</p>
+      <p>Deadline: {deadline} ({daysLeft} days)</p>
+      <div style={{ background: "#eee", height: 10, margin: "10px 0" }}>
+        <div style={{ width: `${progress}%`, height: "100%", background: barColor }} />
       </div>
-
-      {isComplete && <p style={{ color: "green" }}>✅ Goal Complete</p>}
-      {isWarning && <p style={{ color: "orange" }}>⚠️ Deadline within 30 days</p>}
-      {isOverdue && <p style={{ color: "red" }}>❌ Goal Overdue</p>}
-
+      {isComplete && <p style={{ color: "green" }}>✅ Complete</p>}
+      {daysLeft < 0 && !isComplete && <p style={{ color: "red" }}>❌ Overdue</p>}
+      {daysLeft <= 30 && daysLeft >= 0 && !isComplete && <p style={{ color: "orange" }}>⚠️ Near Deadline</p>}
       <input
         type="number"
-        placeholder="Deposit amount"
-        value={depositAmount}
-        onChange={(e) => setDepositAmount(e.target.value)}
-        style={{ marginRight: "5px" }}
+        value={deposit}
+        onChange={(e) => setDeposit(e.target.value)}
+        placeholder="Deposit"
+        style={{ marginRight: 5 }}
       />
       <button onClick={handleDeposit}>Deposit</button>
-      <button onClick={() => onDelete(id)} style={{ marginLeft: "10px" }}>Delete</button>
+      <button onClick={() => onDelete(id)} style={{ marginLeft: 10 }}>Delete</button>
     </div>
   );
 }

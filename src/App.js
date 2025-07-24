@@ -9,40 +9,33 @@ function App() {
 
   useEffect(() => {
     fetch("http://localhost:3000/goals")
-      .then((res) => res.json())
+      .then(res => res.json())
       .then(setGoals);
   }, []);
 
-  function addGoal(newGoal) {
+  const addGoal = (goal) =>
     fetch("http://localhost:3000/goals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newGoal),
+      body: JSON.stringify(goal),
     })
-      .then((res) => res.json())
-      .then((data) => setGoals((prev) => [...prev, data]));
-  }
+      .then(res => res.json())
+      .then(data => setGoals(prev => [...prev, data]));
 
-  function updateGoal(id, updatedFields) {
+  const updateGoal = (id, fields) =>
     fetch(`http://localhost:3000/goals/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedFields),
+      body: JSON.stringify(fields),
     })
-      .then((res) => res.json())
-      .then((updatedGoal) => {
-        setGoals((prev) =>
-          prev.map((goal) => (goal.id === id ? updatedGoal : goal))
-        );
-      });
-  }
+      .then(res => res.json())
+      .then(updated =>
+        setGoals(prev => prev.map(g => (g.id === id ? updated : g)))
+      );
 
-  function deleteGoal(id) {
+  const deleteGoal = (id) =>
     fetch(`http://localhost:3000/goals/${id}`, { method: "DELETE" })
-      .then(() => {
-        setGoals((prev) => prev.filter((goal) => goal.id !== id));
-      });
-  }
+      .then(() => setGoals(prev => prev.filter(g => g.id !== id)));
 
   return (
     <div className="App">
